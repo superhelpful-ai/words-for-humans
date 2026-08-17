@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+# Check the comments and documentation in the staged change.
+#
+# Only staged files are read, so the hook stays fast and never reports on work
+# the commit does not touch. Set STE_LINT_SKIP=1 to bypass it for one commit.
+set -euo pipefail
+
+if [[ "${STE_LINT_SKIP:-0}" == "1" ]]; then
+    exit 0
+fi
+
+if ! command -v words-for-humans >/dev/null 2>&1; then
+    if command -v uvx >/dev/null 2>&1; then
+        run() { uvx words-for-humans "$@"; }
+    else
+        echo "words-for-humans is not installed. Run: uv tool install words-for-humans" >&2
+        exit 0
+    fi
+else
+    run() { words-for-humans "$@"; }
+fi
+
+if ! run --staged; then
+    cat >&2 <<'MESSAGE'
+
+The commit was stopped by words-for-humans. Fix the findings above, or:
+
+  git commit --no-verify        commit this once without the check
+  STE_LINT_SKIP=1 git commit    the same thing, by environment variable
+  words-for-humans --write-baseline     accept everything currently in the repository
+
+MESSAGE
+    exit 1
+fi

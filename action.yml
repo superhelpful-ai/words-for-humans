@@ -1,0 +1,143 @@
+# A composite action that runs words-for-humans from PyPI. Reference it with
+# `uses: superhelpful-ai/words-for-humans@v0.3.0` after a checkout step.
+#
+# On a pull request the action checks only the files the pull request changes,
+# by diffing against the base branch. On any other event it scans the whole
+# repository. Give the checkout step `fetch-depth: 0` so the diff can find the
+# merge base. Without it the action falls back to un-shallowing the clone,
+# which costs a second fetch.
+
+name: words-for-humans
+description: Check comments and documentation for prose that carries no information
+author: Mitch Hayes
+
+branding:
+  icon: message-square
+  color: blue
+
+inputs:
+  version:
+    description: >-
+      Package version to run, for example "0.1.0". Empty installs the latest
+      release on PyPI.
+    required: false
+    default: ""
+  base:
+    description: >-
+      Branch to diff against. Empty uses the pull request base branch when
+      there is one, and scans the whole repository otherwise. Set "none" to
+      scan the whole repository even on a pull request.
+    required: false
+    default: ""
+  format:
+    description: >-
+      Output format. The default, "github", annotates each finding against
+      its line in the Files Changed view.
+    required: false
+    default: github
+  strict:
+    description: Fail the run on warnings as well as failures.
+    required: false
+    default: "false"
+  args:
+    description: Extra command-line arguments, split on whitespace.
+    required: false
+    default: ""
+  working-directory:
+    description: Directory to run in, for repositories with nested projects.
+    required: false
+    default: "."
+  pr-description:
+    description: >-
+      Also check the pull request description. The default, "auto", reads it
+      from the event payload on pull request events; "none" skips it. Needs
+      version 0.2.1 or later.
+    required: false
+    default: auto
+  ai-provider:
+    description: >-
+      Turn on the judgment tier: "openrouter" or "ollama". Empty keeps the
+      run free of model calls. Judgment findings report as warnings.
+    required: false
+    default: ""
+  ai-key:
+    description: API key for a hosted ai-provider. Pass a repository secret.
+    required: false
+    default: ""
+  ai-model:
+    description: Override the provider's default model.
+    required: false
+    default: ""
+  ai-host:
+    description: >-
+      Override the provider's endpoint. An ollama provider with a key already
+      defaults to https://ollama.com, so this is for self-hosted daemons.
+    required: false
+    default: ""
+
+runs:
+  using: composite
+  steps:
+    - uses: astral-sh/setup-uv@v10.0.0
+    - name: Run words-for-humans
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      # Inputs reach the script through the environment, not through template
+      # interpolation, so a crafted input cannot become shell syntax.
+      env:
+        WFH_VERSION: ${{ inputs.version }}
+        WFH_BASE: ${{ inputs.base }}
+        WFH_FORMAT: ${{ inputs.format }}
+        WFH_STRICT: ${{ inputs.strict }}
+        WFH_ARGS: ${{ inputs.args }}
+        WFH_PR_DESCRIPTION: ${{ inputs.pr-description }}
+        W4H_AI_PROVIDER: ${{ inputs.ai-provider }}
+        W4H_AI_KEY: ${{ inputs.ai-key }}
+        W4H_AI_MODEL: ${{ inputs.ai-model }}
+        W4H_AI_HOST: ${{ inputs.ai-host }}
+      run: |
+        set -euo pipefail
+
+        pkg="words-for-humans${WFH_VERSION:+==$WFH_VERSION}"
+
+        description=()
+        if [ "$WFH_PR_DESCRIPTION" = "auto" ] && [ -f "${GITHUB_EVENT_PATH:-}" ]; then
+            body_file="${RUNNER_TEMP:-/tmp}/wfh-pr-description.md"
+            jq -r '.pull_request.body // empty' "$GITHUB_EVENT_PATH" > "$body_file"
+            if [ -s "$body_file" ]; then
+                description=(--pr-description-file "$body_file")
+            fi
+        fi
+
+        base="$WFH_BASE"
+        if [ -z "$base" ] && [ -n "${GITHUB_BASE_REF:-}" ]; then
+            base="$GITHUB_BASE_REF"
+        fi
+
+        scan=()
+        if [ -n "$base" ] && [ "$base" != "none" ]; then
+            git fetch --no-tags origin "+refs/heads/$base:refs/remotes/origin/$base"
+            if ! git merge-base "origin/$base" HEAD >/dev/null 2>&1 \
+                && [ "$(git rev-parse --is-shallow-repository)" = "true" ]; then
+                git fetch --no-tags --unshallow origin
+            fi
+            if ! git merge-base "origin/$base" HEAD >/dev/null 2>&1; then
+                echo "No merge base between origin/$base and HEAD." >&2
+                echo "Give the checkout step fetch-depth: 0." >&2
+                exit 1
+            fi
+            scan=(--diff "origin/$base...HEAD")
+        fi
+
+        flags=(--format "$WFH_FORMAT")
+        if [ "$WFH_STRICT" = "true" ]; then
+            flags+=(--strict)
+        fi
+
+        extra=()
+        if [ -n "$WFH_ARGS" ]; then
+            read -r -a extra <<<"$WFH_ARGS"
+        fi
+
+        uvx "$pkg" ${scan+"${scan[@]}"} ${description+"${description[@]}"} \
+            "${flags[@]}" ${extra+"${extra[@]}"}

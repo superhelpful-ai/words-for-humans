@@ -1,0 +1,28 @@
+{
+  "_note": "Words that read as needlessly fancy in software prose, each with a plainer everyday word that is at least as clear. Rule 1.1 reports these. The mechanism comes from ASD-STE100 rule 1.1 (use an approved word), but the vocabulary is re-selected for software: aerospace bans precise technical verbs (execute, modify, initiate) to keep a manual readable by a non-native mechanic, whereas software depends on them. The list is deliberately narrow. It holds words that are distinctly fancy, where the plain word is always better, and leaves out neutral technical vocabulary that reads fine at volume (additional, various, subsequent, obtain, sufficient, approximately). Also left out on purpose: precise technical terms (execute, enable, generate, handle, secure, verify, reference, acquire), praise adjectives (robust, seamless, powerful, comprehensive) which rule A-2 covers, and multi-word padding (in order to) which rule V-5 covers.",
+  "_source": "Word-choice mechanism after ASD-STE100 Issue 9, Part 2, rule 1.1. Vocabulary selected for software prose by this project. Specification copyright ASD, https://www.asd-ste100.org/",
+  "not_approved": {
+    "accomplish": ["do (v)", "complete (v)"],
+    "aforementioned": ["this (adj)", "that (adj)"],
+    "ascertain": ["find out (v)"],
+    "assist": ["help (v)"],
+    "cease": ["stop (v)"],
+    "commence": ["start (v)"],
+    "considerable": ["large (adj)"],
+    "delve": ["examine (v)", "look at (v)"],
+    "endeavor": ["try (v)"],
+    "endeavour": ["try (v)"],
+    "facilitate": ["help (v)", "ease (v)"],
+    "furthermore": ["also (adv)"],
+    "leverage": ["use (v)"],
+    "moreover": ["also (adv)"],
+    "myriad": ["many (adj)"],
+    "necessitate": ["need (v)"],
+    "numerous": ["many (adj)"],
+    "plethora": ["too many (n)"],
+    "possess": ["have (v)"],
+    "regarding": ["about (prep)"],
+    "utilise": ["use (v)"],
+    "utilize": ["use (v)"]
+  }
+}

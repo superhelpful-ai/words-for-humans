@@ -1,0 +1,30 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+dist/
+build/
+*.egg-info/
+
+# The ASD-STE100 dictionary is copyright ASD. It is extracted from each user's
+# own copy of the specification and must never be committed.
+.words-for-humans/
+**/dictionary.json
+
+# Committed on purpose. The baseline records the debt from the first run.
+# Only new findings fail the build. See .words-for-humans.toml.
+
+# Credentials
+.env
+*.pem
+
+# The shareable report is generated output, not source
+report.html
+
+# Coverage artifacts
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml

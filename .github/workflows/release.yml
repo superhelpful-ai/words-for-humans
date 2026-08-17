@@ -1,0 +1,49 @@
+name: Release
+
+# Pushing a v* tag builds the words-for-humans package and publishes it to
+# PyPI. Publication authenticates with PyPI trusted publishing (OIDC), so the
+# workflow needs no stored token. PyPI must list this repository and workflow
+# as a trusted publisher for the project, under the "pypi" environment.
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10.0.0
+        with:
+          enable-cache: true
+      - run: uv sync
+      - run: uv run pytest -q
+      - name: Check the tag matches the package version
+        run: |
+          version=$(uv run python -c "from importlib.metadata import version; print(version('words-for-humans'))")
+          if [ "v$version" != "$GITHUB_REF_NAME" ]; then
+            echo "Tag $GITHUB_REF_NAME does not match package version $version" >&2
+            exit 1
+          fi
+      - run: uv build
+      - uses: actions/upload-artifact@v7
+        with:
+          name: dist
+          path: dist/
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: dist
+          path: dist/
+      - uses: pypa/gh-action-pypi-publish@release/v1

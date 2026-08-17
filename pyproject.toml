@@ -1,0 +1,147 @@
+[project]
+name = "words-for-humans"
+version = "0.3.0"
+description = "Finds code comments and documentation that carry no information"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Mitch Hayes" }]
+keywords = [
+    "linter",
+    "comments",
+    "documentation",
+    "simplified-technical-english",
+    "asd-ste100",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Quality Assurance",
+    "Topic :: Text Processing :: Linguistic",
+]
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/superhelpful-ai/words-for-humans"
+Repository = "https://github.com/superhelpful-ai/words-for-humans"
+Issues = "https://github.com/superhelpful-ai/words-for-humans/issues"
+
+[project.optional-dependencies]
+dictionary = ["pypdf>=5.0", "cryptography>=43.0"]
+# The `nlp` extra turns on the part-of-speech backend, which makes the
+# noun-cluster and passive-voice rules precise. It also needs the model:
+#     pip install words-for-humans[nlp]
+#     python -m spacy download en_core_web_sm
+nlp = ["spacy>=3.7"]
+
+[project.scripts]
+words-for-humans = "words_for_humans.cli:main"
+words-for-humans-extract-dictionary = "words_for_humans.extract_dictionary:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/words_for_humans"]
+
+[tool.hatch.build.targets.sdist]
+include = ["src/", "tests/", "README.md"]
+
+[dependency-groups]
+dev = [
+    "coverage>=7.15.4",
+    "interrogate>=1.7.0",
+    "mypy>=2.3.0",
+    "pip-audit>=2.10.1",
+    "pre-commit>=4.6.1",
+    "pylint>=4.0.7",
+    "pytest>=8.0",
+    "pytest-cov>=7.1.0",
+    "radon>=6.0.1",
+    "refurb>=2.3.1",
+    "ruff>=0.6",
+    "vulture>=2.16",
+    "xenon>=0.9.3",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "C90", "I", "N", "UP", "B", "SIM", "PL", "PERF", "S", "RUF"]
+ignore = [
+    # Imports inside functions are deliberate here: they keep CLI startup fast
+    # and break import cycles between the engine and its optional pieces.
+    "PLC0415",
+    # Magic-value comparisons are pervasive in the text-parsing code (counts,
+    # offsets, thresholds) and flagging each one is noise, not signal.
+    "PLR2004",
+    # Function-size metrics (arguments, branches, returns, statements) are gated
+    # by xenon against a measured baseline, not duplicated as per-line errors.
+    "PLR0911", "PLR0912", "PLR0913", "PLR0915", "PLR0917",
+    # The engine calls `git` by name, passing argument lists and never a shell.
+    "S603", "S607",
+]
+
+[tool.ruff.lint.mccabe]
+# Baseline: the most complex function today is cli.main at 17. Ratchet down.
+max-complexity = 18
+
+[tool.ruff.lint.per-file-ignores]
+# Tests assert and compare against literals by design.
+"**/tests/**" = ["S", "PLR2004"]
+
+[tool.mypy]
+python_version = "3.11"
+files = ["src"]
+warn_redundant_casts = true
+warn_unused_ignores = true
+# Goal: strict = true. It reports errors today, almost all from the untyped
+# @check decorator making every check function untyped. Type that seam, then
+# turn strict on.
+
+# The Anthropic SDK is an optional extra (the judge extra). The judgment tier
+# imports it lazily and degrades without it, so type-checking must pass whether
+# or not the SDK is installed in the checking environment.
+[[tool.mypy.overrides]]
+module = ["anthropic", "anthropic.*"]
+ignore_missing_imports = true
+
+# spaCy is the optional `nlp` extra. The part-of-speech backend imports it
+# lazily and degrades without it, so type-checking must pass whether or not it
+# is installed. numpy arrives transitively with spaCy; skip its stubs, which use
+# 3.12+ syntax the pinned target does not parse.
+[[tool.mypy.overrides]]
+module = ["spacy", "spacy.*", "numpy", "numpy.*"]
+ignore_missing_imports = true
+follow_imports = "skip"
+
+# pypdf is the optional `dictionary` extra. The extraction command imports it
+# lazily and explains the extra when it is missing.
+[[tool.mypy.overrides]]
+module = ["pypdf", "pypdf.*"]
+ignore_missing_imports = true
+
+[tool.interrogate]
+# Baseline: docstring coverage is ~49% outside tests. Ratchet up over time.
+fail-under = 45
+exclude = ["**/tests/**"]
+verbose = 2
+
+[tool.vulture]
+min_confidence = 80
+paths = ["src"]
+
+[tool.coverage.run]
+branch = true
+source = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

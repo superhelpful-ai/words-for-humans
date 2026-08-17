@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10.0.0
+        with:
+          enable-cache: true
+      - run: uv sync
+      - run: uv run ruff check .
+      - run: uv run pytest -q --cov
+
+  quality:
+    # Static analysis gated at the codebase's current baseline. Each threshold
+    # passes today, so a regression fails the build. Tighten the thresholds in
+    # pyproject.toml and this file as the debt behind them is paid down.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10.0.0
+        with:
+          enable-cache: true
+      - run: uv sync
+      - run: uv run mypy
+      - run: uv run vulture
+      - run: uv run interrogate
+      - run: uv run xenon --max-absolute C --max-modules C --max-average A src
+      - run: uv run pip-audit
+
+  self-check:
+    # The tool is run against its own comments and documentation. A linter that
+    # cannot pass itself is not one to sell.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: astral-sh/setup-uv@v10.0.0
+      # Judgment verdicts are cached by content, so carrying the cache across
+      # runs means only new or changed text costs a model call.
+      - uses: actions/cache@v5
+        with:
+          path: ~/.cache/words-for-humans/judgment
+          key: judgment-${{ github.run_id }}
+          restore-keys: judgment-
+      - run: uv sync
+      - env:
+          # Judgment turns on by itself once the repository has the secret.
+          W4H_AI_PROVIDER: ${{ secrets.OLLAMA_API_KEY && 'ollama' || '' }}
+          W4H_AI_KEY: ${{ secrets.OLLAMA_API_KEY }}
+          W4H_AI_MODEL: glm-5.2
+        run: uv run words-for-humans --format github

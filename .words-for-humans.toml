@@ -1,0 +1,14 @@
+# The tool's own configuration, and a worked example of the format.
+#
+# The repository carries a baseline. Everything found when the tool first ran
+# against itself stays visible in reports but does not fail the build; only new
+# findings can. That is the same adoption path the README recommends, and using
+# it here rather than loosening the thresholds keeps the defaults honest.
+
+profile = "concise"
+
+scopes = ["comment", "docstring", "markdown", "string"]
+
+exclude = [
+    "**/data/starter_dictionary.json",
+]

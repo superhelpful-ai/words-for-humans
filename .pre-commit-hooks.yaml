@@ -1,0 +1,9 @@
+- id: words-for-humans
+  name: words-for-humans
+  description: Check comments and documentation for prose that carries no information
+  entry: words-for-humans
+  args: [--staged]
+  language: python
+  types_or: [python, javascript, jsx, ts, tsx, go, rust, markdown, sql, shell]
+  pass_filenames: false
+  require_serial: true
