@@ -6,7 +6,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from . import dictionary, engine, judgment, profiles, report
+from . import __version__, dictionary, engine, judgment, profiles, report
 from .baseline import Baseline
 from .config import Config
 from .model import Report
@@ -129,6 +129,12 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--list-rules", action="store_true", help="Print the rule catalogue and exit"
+    )
+    parser.add_argument(
+        "--version",
+        action="version",
+        version=f"%(prog)s {__version__}",
+        help="Print the version and exit",
     )
     return parser
 

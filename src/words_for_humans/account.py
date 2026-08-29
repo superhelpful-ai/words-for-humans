@@ -15,7 +15,7 @@ Company glossary
     service.
 
 Judgment rules
-    Thirty of the 53 rules need a reader who understands the text. Those run as
+    Fifty-eight of the 104 rules need a reader who understands the text. Those run as
     model calls, which cost money per call, so they are metered.
 
 History and attestation

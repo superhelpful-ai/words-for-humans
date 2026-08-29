@@ -19,7 +19,7 @@ jobs:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
-      - uses: superhelpful-ai/words-for-humans@v0.3.0
+      - uses: superhelpful-ai/words-for-humans@v0.3.1
 ```
 
 The action installs the tool from PyPI, and on a pull request it checks the
@@ -31,7 +31,7 @@ trio below.
 To run the judgment rules as well, name a provider and pass a key:
 
 ```yaml
-      - uses: superhelpful-ai/words-for-humans@v0.3.0
+      - uses: superhelpful-ai/words-for-humans@v0.3.1
         with:
           ai-provider: openrouter
           ai-key: ${{ secrets.OPENROUTER_API_KEY }}
@@ -47,31 +47,10 @@ switches work anywhere the command runs, as environment variables:
 run). A description can also be checked by hand with
 `--pr-description-file PATH`.
 
-The repository is not public, and a private action resolves only from private
-repositories of the same owner whose Actions access settings allow it.
-Anywhere else, spell the steps out:
+To run the command yourself instead of through the action:
 
 ```yaml
-name: Comments
-
-on: pull_request
-
-permissions:
-  contents: read
-  pull-requests: write
-
-jobs:
-  words-for-humans:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-      - uses: astral-sh/setup-uv@v10.0.0
-      - run: |
-          uvx words-for-humans \
-            --diff origin/${{ github.base_ref }}...HEAD \
-            --format github
+      - run: uvx words-for-humans --diff origin/${{ github.base_ref }}...HEAD --format github
 ```
 
 `--format github` emits workflow commands, so each finding appears against the

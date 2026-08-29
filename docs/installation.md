@@ -140,7 +140,7 @@ action, the SARIF variant, and recipes for Buildkite and GitLab.
 
 ## 6. Install the review skill
 
-The command decides 38 of the 83 rules by inspection. The other 40 need a
+The command decides 41 of the 104 rules by inspection. Another 58 need a
 reader who understands the subject: whether a word is a genuine technical
 noun, whether a paragraph has one topic. A Claude Code skill covers those,
 and it ships inside the package:
@@ -177,5 +177,7 @@ run uses.
 `words-for-humans --list-rules` names every rule and its slug. To silence one
 rule everywhere, add it to `disable` in the config. To silence one place, put
 `# words-for-humans: ignore` in the comment. If a rule fires on prose you
-think is right, send the text to whoever pointed you at this guide: false
-positives are the findings we most want to see.
+think is right, open a
+[false-positive issue](https://github.com/superhelpful-ai/words-for-humans/issues)
+with the rule and the exact text: false positives are the findings we most
+want to see.
