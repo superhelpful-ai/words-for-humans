@@ -5,7 +5,7 @@
 # findings can. That is the same adoption path the README recommends, and using
 # it here rather than loosening the thresholds keeps the defaults honest.
 
-profile = "concise"
+profile = "code"
 
 scopes = ["comment", "docstring", "markdown", "string"]
 

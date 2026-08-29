@@ -101,3 +101,13 @@ def test_a_missing_description_file_is_a_usage_error(two_repos, monkeypatch, cap
     monkeypatch.chdir(elsewhere)
     exit_code = cli.main(["--pr-description-file", "no-such-file.md"])
     assert exit_code == 2
+
+
+def test_version_prints_the_package_version(capsys):
+    import words_for_humans
+
+    with pytest.raises(SystemExit) as excinfo:
+        cli.main(["--version"])
+    assert excinfo.value.code == 0
+    out = capsys.readouterr().out.strip()
+    assert out == f"words-for-humans {words_for_humans.__version__}"

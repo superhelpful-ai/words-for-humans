@@ -25,4 +25,4 @@ fi
 cp "$script_dir/pre-commit" "$target"
 chmod +x "$target"
 echo "Installed the pre-commit hook at $target"
-echo "Set STE_LINT_SKIP=1 to bypass it for one commit."
+echo "Set WORDS_FOR_HUMANS_SKIP=1 to bypass it for one commit."

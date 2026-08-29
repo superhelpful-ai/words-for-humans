@@ -2,10 +2,10 @@
 # Check the comments and documentation in the staged change.
 #
 # Only staged files are read, so the hook stays fast and never reports on work
-# the commit does not touch. Set STE_LINT_SKIP=1 to bypass it for one commit.
+# the commit does not touch. Set WORDS_FOR_HUMANS_SKIP=1 to bypass it for one commit.
 set -euo pipefail
 
-if [[ "${STE_LINT_SKIP:-0}" == "1" ]]; then
+if [[ "${WORDS_FOR_HUMANS_SKIP:-0}" == "1" ]]; then
     exit 0
 fi
 
@@ -26,7 +26,7 @@ if ! run --staged; then
 The commit was stopped by words-for-humans. Fix the findings above, or:
 
   git commit --no-verify        commit this once without the check
-  STE_LINT_SKIP=1 git commit    the same thing, by environment variable
+  WORDS_FOR_HUMANS_SKIP=1 git commit    the same thing, by environment variable
   words-for-humans --write-baseline     accept everything currently in the repository
 
 MESSAGE

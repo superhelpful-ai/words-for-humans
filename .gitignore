@@ -28,3 +28,6 @@ report.html
 .coverage.*
 htmlcov/
 coverage.xml
+
+# The default report file is generated output, not source
+words-for-humans-report.txt

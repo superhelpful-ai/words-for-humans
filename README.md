@@ -1,5 +1,9 @@
 # words-for-humans
 
+[![PyPI](https://img.shields.io/pypi/v/words-for-humans)](https://pypi.org/project/words-for-humans/)
+[![CI](https://github.com/superhelpful-ai/words-for-humans/actions/workflows/ci.yml/badge.svg)](https://github.com/superhelpful-ai/words-for-humans/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 Most new code is written by an assistant and reviewed by a person. The code
 gets tests, types, and CI. The prose around it gets nothing, and the prose is
 what the reviewer reads first. `words-for-humans` checks that prose: comments,
@@ -123,7 +127,7 @@ words-for-humans --staged                    # what you are about to commit
 words-for-humans --diff origin/main...HEAD   # what a pull request changes
 words-for-humans --stdout                    # print every finding, do not write a file
 words-for-humans --format json               # for a script
-words-for-humans --format html > report.html # a page to send someone
+words-for-humans --format html . > report.html # a page to send someone
 words-for-humans --init                      # write a starter config
 words-for-humans --list-rules                # every rule, its slug, and which half checks it
 ```
@@ -235,21 +239,15 @@ To silence one place rather than one rule, put the escape hatch in the comment:
 
 ## Pre-commit
 
-The package is on PyPI and the repository is not public, so the hook is
-declared locally and pre-commit installs the package itself:
+The repository declares the hook in
+[.pre-commit-hooks.yaml](.pre-commit-hooks.yaml), so point pre-commit at it:
 
 ```yaml
 repos:
-  - repo: local
+  - repo: https://github.com/superhelpful-ai/words-for-humans
+    rev: v0.3.1
     hooks:
       - id: words-for-humans
-        name: words-for-humans
-        entry: words-for-humans --staged
-        language: python
-        additional_dependencies: [words-for-humans]
-        types_or: [python, javascript, jsx, ts, tsx, go, rust, markdown, sql, shell]
-        pass_filenames: false
-        require_serial: true
 ```
 
 Without pre-commit, a plain git hook that does the same is in
@@ -267,8 +265,19 @@ theirs:
 ```
 
 [docs/ci.md](docs/ci.md) has full recipes for GitHub Actions, Buildkite, and
-GitLab, and a one-step composite action. A hosted GitHub App that reviews
-pull requests is in private development.
+GitLab, and a one-step composite action.
+
+### The hosted App
+
+The [words-for-humans GitHub App](https://github.com/apps/words-for-humans)
+reviews pull requests without a workflow file. It annotates only the lines
+the diff adds, and it can gate the merge as a required check.
+
+The mechanical rules are free. Most of the catalogue needs judgment, and
+those rules run when the account supplies its own Anthropic API key. The
+CLI draws the same line: the judgment tier runs only with a provider token.
+A paid plug-and-play tier is coming.
+[wordsforhumans.io](https://wordsforhumans.io) has the details.
 
 ## Where the rules come from
 

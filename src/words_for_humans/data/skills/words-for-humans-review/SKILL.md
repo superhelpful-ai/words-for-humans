@@ -5,10 +5,10 @@ description: Review code comments, docstrings, documentation and user-facing str
 
 # ASD-STE100 review
 
-`words-for-humans` decides 38 of the 83 rules by inspection: sentence length, paragraph
+`words-for-humans` decides 41 of the 104 rules by inspection: sentence length, paragraph
 length, semicolons, contractions, passive voice, tense, spelling, and the closed
-word lists. This skill covers the 40 that need a reader who understands what the
-text is about.
+word lists. This skill covers the 58 that need a reader who understands what the
+text is about. The remaining five define how words are counted and report nothing.
 
 Run the command first. Never repeat what it already reports.
 
